@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# North Ayrshire Athletics Club IDs
+*naac*
