@@ -5,15 +5,19 @@ from power_of_10.models.athlete import Athlete
 
 class PowerOf10:
     def __init__(self):
+        self._page_html = None
         pass
 
+    def _get_page_html(self, url: str) -> str:
+        self._page_html = httpx.get(url).text
+        return self._page_html
+    
     def get_athlete_by_id(self, athlete_id: int):
         """Get an athlete's details by their athleteid."""
         url = f"https://www.thepowerof10.info/athletes/profile.aspx?athleteid={athlete_id}"
+        html = self._get_page_html(url)
 
-        html = httpx.get(url)
-
-        soup = BeautifulSoup(html.text, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
 
         athlete_name = (
             soup.find("tr", {"class": "athleteprofilesubheader"})
@@ -44,4 +48,19 @@ class PowerOf10:
             region=region,
             nation=nation,
         )
+
+        best_performances_table = (
+            soup.find("div", {"id": "cphBody_divBestPerformances"})
+            .find("table")
+        )
+        best_performance_rows = best_performances_table.find_all("tr")
+
+        headers, data_rows = [],  []
+        for tr in best_performance_rows:
+            if tr.find("td").text == "Event":
+                headers = tr.find_all("td")
+            elif tr.find("td").text != "Event" and headers:
+                data_rows.append(tr.find_all("td"))
+            
+        print([[td.text for td in tr] for tr in data_rows])
         return athlete

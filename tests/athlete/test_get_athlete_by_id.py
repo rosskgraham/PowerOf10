@@ -24,3 +24,8 @@ def test_get_athlete_by_id():
     "nation": "Scotland"
 }
 """
+
+def test_mock():
+    po10 = PowerOf10()
+    _ = po10._get_page_html("https://www.thepowerof10.info/athletes/profile.aspx?athleteid=1114055")
+    print(po10._page_html)
