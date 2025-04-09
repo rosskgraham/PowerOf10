@@ -1,21 +1,36 @@
-from power_of_10 import PowerOf10
+import polars as pl
 import yaml
 from alive_progress import alive_it
-from power_of_10.models.athlete import Athlete
+
+from power_of_10 import Athlete, PowerOf10
 
 
 def main():
+    with open("config.yml", "r") as config_file:
+        config: dict[dict[int, str]] = yaml.safe_load(config_file.read())
+
     po10 = PowerOf10()
     athletes: list[Athlete] = []
-    with open("config.yml", "r") as f:
-        config: dict[dict[int, str]] = yaml.safe_load(f.read())
-
-    for athlete_id, athlete_name in (bar:=alive_it(config.get("athletes").items())):
-        bar.text=athlete_name
+    for athlete_id, athlete_name in (bar := alive_it(config.get("athletes").items())):
+        bar.text = athlete_name
         athletes.append(po10.get_athlete_by_id(athlete_id))
 
+    # Event PBs
+    personal_bests = []
     for athlete in athletes:
-        print(athlete.model_dump_json(indent=4))
+        personal_bests.append(
+            {
+                "name": athlete.name,
+                **{
+                    k: v.best_known_performances.personal_best
+                    for k, v in athlete.events.items()
+                },
+            }
+        )
+    df = pl.DataFrame(personal_bests).fill_null("")
+    with pl.Config(tbl_cols=len(df.columns)):
+        print(df.sort(by="name"))
+    # df.write_csv("C:/Temp/po10.csv")
 
 
 if __name__ == "__main__":
