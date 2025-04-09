@@ -5,12 +5,11 @@ from power_of_10.models.athlete import Athlete
 
 class PowerOf10:
     def __init__(self):
-        self._page_html = None
         pass
 
     def _get_page_html(self, url: str) -> str:
-        self._page_html = httpx.get(url).text
-        return self._page_html
+        page_html = httpx.get(url, verify=False).text
+        return page_html
     
     def get_athlete_by_id(self, athlete_id: int):
         """Get an athlete's details by their athleteid."""

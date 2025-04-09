@@ -10,7 +10,8 @@ def main():
     with open("config.yml", "r") as f:
         config: dict[dict[int, str]] = yaml.safe_load(f.read())
 
-    for athlete_id, _ in alive_it(config.get("athletes").items()):
+    for athlete_id, athlete_name in (bar:=alive_it(config.get("athletes").items())):
+        bar.text=athlete_name
         athletes.append(po10.get_athlete_by_id(athlete_id))
 
     for athlete in athletes:
