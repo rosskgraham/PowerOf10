@@ -21,26 +21,17 @@ from power_of_10 import AthleteNotFoundException, PowerOf10
 
 def mock_httpx_get(url: str, verify: bool = True) -> httpx.Response:
     """Mock httpx Response with static HTML from file"""
-    athelete_id = url.split("=")[1]
+    athlete_id = url.split("=")[1]
     mock_athlete_profile_path = (
-        Path(__file__).parent.parent
-        / "mock_data"
-        / "athlete_profiles"
-        / f"{athelete_id}.html"
-    )
-    mock_athlete_not_found_path = (
-        Path(__file__).parent.parent
-        / "mock_data"
-        / "athlete_profiles"
-        / "not_found.html"
+        Path(__file__).parent.parent / "mock_data" / "athlete_profiles"
     )
     try:
-        with open(mock_athlete_profile_path, "r") as html_file:
+        with open(mock_athlete_profile_path / f"{athlete_id}.html", "r") as html_file:
             html = html_file.read()
         return httpx.Response(text=html, status_code=200)
     except FileNotFoundError:
         # Unknown athlete, return profile not found page
-        with open(mock_athlete_not_found_path, "r") as html_file:
+        with open(mock_athlete_profile_path / "not_found.html", "r") as html_file:
             html = html_file.read()
         return httpx.Response(text=html, status_code=200)
 
