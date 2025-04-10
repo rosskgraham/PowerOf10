@@ -1,2 +1,39 @@
+events:
+  "60":
+    name: 60m
+    type: t
+  "75":
+    name: 75m
+    type: t
+  "80":
+    name: 80m
+    type: t
+  "150":
+    name: 150m
+    type: t
+  "200":
+    name: 200m
+    type: t
+  "600":
+    name: 600m
+    type: t
+  "800":
+    name: 800m
+    type: t
+  "1200":
+    name: 1200m
+    type: t
+  "1500":
+    name: 1500m
+    type: t
+  "60H":
+    name: 60m Hurdles
+    type: t
+  "75H":
+    name: 75m Hurdles
+    type: t
+  HJ:
+    name: High Jump
+    type: d
 athletes:
   1114055: Murray Graham

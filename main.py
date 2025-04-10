@@ -28,6 +28,7 @@ def main():
             }
         )
     df = pl.DataFrame(personal_bests).fill_null("")
+    df.columns = [config["events"].get(e,{"name":e})["name"] for e in df.columns]
     with pl.Config(tbl_cols=len(df.columns)):
         print(df.sort(by="name"))
     # df.write_csv("C:/Temp/po10.csv")
