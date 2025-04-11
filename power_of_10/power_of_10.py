@@ -1,14 +1,19 @@
 import httpx
 from bs4 import BeautifulSoup
 
-from power_of_10 import Athlete, AthleteNotFoundException, BestKnownPerformances, Event
+from power_of_10 import (
+    Athlete,
+    AthleteNotFoundException,
+    BestKnownPerformances,
+    EventPerfomance,
+)
 
 
 class PowerOf10:
     def __init__(self):
         pass
 
-    def get_athlete_by_id(self, athlete_id: int):
+    def get_athlete_by_id(self, athlete_id: int) -> Athlete:
         """Get an athlete's details by their athleteid."""
         url = f"https://www.thepowerof10.info/athletes/profile.aspx?athleteid={athlete_id}"
         html = httpx.get(url, verify=False).text
@@ -59,7 +64,7 @@ class PowerOf10:
                     if th_td[0] != "Event"  # Lose the repeated Event Name column
                 ]
                 personal_best = td[1]
-                events[event] = Event(
+                events[event] = EventPerfomance(
                     event_name=event,
                     best_known_performances=BestKnownPerformances(
                         personal_best=personal_best,
@@ -68,8 +73,6 @@ class PowerOf10:
                         },
                     ),
                 )
-
-            pass
 
         athlete = Athlete(
             name=athlete_name,

@@ -2,6 +2,7 @@
     "python.testing.pytestArgs": [
         "tests",
         "-s",
+        "-vv",
         "--use-mock"
     ],
     "python.testing.unittestEnabled": false,

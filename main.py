@@ -3,11 +3,12 @@ import yaml
 from alive_progress import alive_it
 
 from power_of_10 import Athlete, PowerOf10
+from power_of_10.string_utils import parse_event_code
 
 
 def main():
     with open("config.yml", "r") as config_file:
-        config: dict[dict[int, str]] = yaml.safe_load(config_file.read())
+        config: dict[dict[str, str]] = yaml.safe_load(config_file.read())
 
     po10 = PowerOf10()
     athletes: list[Athlete] = []
@@ -28,8 +29,11 @@ def main():
             }
         )
     df = pl.DataFrame(personal_bests).fill_null("")
-    df.columns = [config["events"].get(e,{"name":e})["name"] for e in df.columns]
-    with pl.Config(tbl_cols=len(df.columns)):
+
+    # Decode event codes to descriptive names
+    df.columns =[f'{parse_event_code(e).event_name}' for e in df.columns]
+
+    with pl.Config(tbl_cols=len(df.columns), tbl_hide_column_data_types=True, tbl_width_chars=1000):
         print(df.sort(by="name"))
     # df.write_csv("C:/Temp/po10.csv")
 
