@@ -19,8 +19,8 @@ def parse_event_code(event_code: str) -> Event:
 
     for match in matches:
         event_code_match = match.group(1)
-        age_group_match = match.group(2) or "-"
-        sex_match = match.group(3) or "-"
+        age_group_match = match.group(2) or None
+        sex_match = match.group(3) or None
         return Event(
             event_code=event_code_match,
             age_group=age_group_match,
@@ -29,6 +29,6 @@ def parse_event_code(event_code: str) -> Event:
     else:
         return Event(
             event_code=event_code,
-            age_group="-",
-            sex="-",
+            age_group=None,
+            sex=None,
         )

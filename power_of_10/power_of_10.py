@@ -6,6 +6,8 @@ from power_of_10 import (
     AthleteNotFoundException,
     BestKnownPerformances,
     EventPerfomance,
+    html_parser,
+    string_utils,
 )
 
 
@@ -24,25 +26,7 @@ class PowerOf10:
 
         soup = BeautifulSoup(html, "html.parser")
 
-        athlete_name = (
-            soup.find("tr", {"class": "athleteprofilesubheader"})
-            .find("td")
-            .find("h2")
-            .text.strip()
-        )
-
-        athlete_details = (
-            soup.find("div", {"id": "cphBody_pnlAthleteDetails"})
-            .find_all("table")[1]
-            .find("table")
-            .find_all("tr")
-        )
-        club = athlete_details[0].find_all("td")[1].text.strip()
-        gender = athlete_details[1].find_all("td")[1].text.strip()
-        age_group = athlete_details[2].find_all("td")[1].text.strip()
-        county = athlete_details[3].find_all("td")[1].text.strip()
-        region = athlete_details[4].find_all("td")[1].text.strip()
-        nation = athlete_details[5].find_all("td")[1].text.strip()
+        athlete = html_parser.get_athlete_details(soup)
 
         best_performance_rows = (
             soup.find("div", {"id": "cphBody_divBestPerformances"})
@@ -64,8 +48,9 @@ class PowerOf10:
                     if th_td[0] != "Event"  # Lose the repeated Event Name column
                 ]
                 personal_best = td[1]
-                events[event] = EventPerfomance(
-                    event_name=event,
+                event_name = string_utils.parse_event_code(event).event_name
+                events[event_name] = EventPerfomance(
+                    event_name=event_name,
                     best_known_performances=BestKnownPerformances(
                         personal_best=personal_best,
                         year_best={
@@ -73,15 +58,6 @@ class PowerOf10:
                         },
                     ),
                 )
-
-        athlete = Athlete(
-            name=athlete_name,
-            club=club,
-            gender=gender,
-            age_group=age_group,
-            county=county,
-            region=region,
-            nation=nation,
-            events=events,
-        )
+        athlete.events = events
+        
         return athlete
