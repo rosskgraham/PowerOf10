@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from .event import Event
+
 
 class BestKnownPerformances(BaseModel):
     personal_best: str
@@ -7,7 +9,7 @@ class BestKnownPerformances(BaseModel):
 
 
 class EventPerfomance(BaseModel):
-    event_name: str
+    event: Event
     best_known_performances: BestKnownPerformances
 
 

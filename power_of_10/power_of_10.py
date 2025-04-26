@@ -48,9 +48,9 @@ class PowerOf10:
                     if th_td[0] != "Event"  # Lose the repeated Event Name column
                 ]
                 personal_best = td[1]
-                event_name = string_utils.parse_event_code(event).event_name
-                events[event_name] = EventPerfomance(
-                    event_name=event_name,
+                event_detail = string_utils.parse_event_code(event)
+                events[event_detail.event_name] = EventPerfomance(
+                    event=event_detail,
                     best_known_performances=BestKnownPerformances(
                         personal_best=personal_best,
                         year_best={

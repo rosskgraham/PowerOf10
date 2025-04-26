@@ -1,3 +1,4 @@
+from .config import get_config
 from .models.athlete import Athlete, BestKnownPerformances, EventPerfomance
 from .models.event import Event
 from .po10_exceptions import AthleteNotFoundException
@@ -9,5 +10,6 @@ __all__ = [
     "BestKnownPerformances",
     "Event",
     "EventPerfomance",
+    "get_config",
     "PowerOf10",
 ]
