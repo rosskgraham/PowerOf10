@@ -24,8 +24,8 @@ def main():
             {
                 "Name": athlete.name,
                 **{
-                    e: athlete.events[e].best_known_performances.personal_best
-                    for e in athlete.events
+                    e: athlete.best_performances[e].personal_best
+                    for e in athlete.best_performances
                 },
             }
         )
@@ -45,18 +45,34 @@ def main():
                     "Result": year_best if year_best[-1] != "i" else year_best[:-1],
                     "Indoor": "Y" if year_best[-1] == "i" else "",
                 }
-                for event, year_bests in athlete.events.items()
-                for year, year_best in year_bests.best_known_performances.year_best.items()
+                for event, best_performances in athlete.best_performances.items()
+                for year, year_best in best_performances.year_bests.items()
                 if year_best != ""
             ]
         )
     year_bests_df = pl.DataFrame(year_bests).fill_null("").sort("Name", "Event", "Year")
 
-    df = personal_bests_df
-    with pl.Config(
-        tbl_cols=len(df.columns), tbl_width_chars=1000, tbl_hide_column_data_types=True
-    ):
-        print(df.sort(by="Name"))
+    # All Performances
+    all_performances = []
+    for athlete in athletes:
+        all_performances.extend(
+            [
+                {
+                    "Name": athlete.name,
+                    "Event": performance.event_name,
+                    "Date": performance.date,
+                    "Year": performance.date.year,
+                    "Performance": performance.performance,
+                    "Indoor": performance.indoor,
+                    "Position": performance.position,
+                    "Meeting": performance.meeting,
+                }
+                for performance in athlete.all_performances
+            ]
+        )
+    all_performances_df = (
+        pl.DataFrame(all_performances).fill_null("").sort("Name", "Event", "Date")
+    )
 
     (temp_path / "PowerOf10.xlsx").unlink(missing_ok=True)
 
@@ -77,6 +93,14 @@ def main():
             table_style="Table Style Medium 5",
             table_name="YearBests",
             column_formats={"Year": "0"},
+            freeze_panes="B2",
+        )
+        all_performances_df.write_excel(
+            workbook=workbook,
+            worksheet="All Performances",
+            autofit=True,
+            table_style="Table Style Medium 5",
+            table_name="AllPerformances",
             freeze_panes="B2",
         )
 

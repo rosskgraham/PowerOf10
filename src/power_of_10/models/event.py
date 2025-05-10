@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from pydantic import BaseModel
 
 events = {
@@ -45,3 +47,5 @@ class Event(BaseModel):
     @property
     def event_type(self) ->str:
         return self._event_type
+
+EventName = Annotated[str,{}]

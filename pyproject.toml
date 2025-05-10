@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "alive-progress>=3.2.0",
+    "altair>=5.5.0",
     "beautifulsoup4>=4.13.3",
     "httpx>=0.28.1",
     "polars>=1.27.0",
@@ -14,6 +15,10 @@ dependencies = [
     "ruff>=0.11.4",
     "xlsxwriter>=3.2.3",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [

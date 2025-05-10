@@ -1,6 +1,6 @@
 import pytest
 
-from power_of_10.models.event import Event
+from power_of_10.models import Event
 from power_of_10.string_utils import parse_event_code
 
 
@@ -108,5 +108,5 @@ from power_of_10.string_utils import parse_event_code
     ],
 )
 def test_parse_event_code(event, expected):
-    """Test event code parsing returns the expeced Event model."""
+    """Test event code parsing returns the expected Event model."""
     assert parse_event_code(event) == expected

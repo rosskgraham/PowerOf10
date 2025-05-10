@@ -1,7 +1,7 @@
 import pytest
 from bs4 import BeautifulSoup
 
-from power_of_10.html_parser import get_athlete_details
+from power_of_10.html_parser import _get_athlete_details
 from power_of_10.po10_exceptions import (
     AthleteDetailsNotFoundException,
     AthleteNameNotFoundException,
@@ -147,18 +147,18 @@ def bad_soup_no_name() -> BeautifulSoup:
 
 
 def test_get_athlete_details(good_soup):
-    athlete = get_athlete_details(good_soup)
+    athlete = _get_athlete_details(good_soup)
     assert athlete.name == "Athlete Name"
     assert athlete.club == "My Club"
 
 
 def test_get_athlete_details_name_not_found(bad_soup_no_name):
     with pytest.raises(AthleteNameNotFoundException) as err:
-        _ = get_athlete_details(bad_soup_no_name)
+        _ = _get_athlete_details(bad_soup_no_name)
     assert err.match("Athlete name not found.")
 
 
 def test_get_athlete_details_details_not_found(bad_soup_no_details):
     with pytest.raises(AthleteDetailsNotFoundException) as err:
-        _ = get_athlete_details(bad_soup_no_details)
+        _ = _get_athlete_details(bad_soup_no_details)
     assert err.match("Athlete details not found.")
