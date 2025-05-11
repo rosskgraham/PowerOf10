@@ -24,6 +24,8 @@ events = {
     "PenI": {"name": "Indoor Pentathlon", "type": "multi", "result_type": "int"},
 }
 
+EventName = Annotated[str, {}]
+
 
 class Event(BaseModel):
     event_code: str
@@ -34,18 +36,16 @@ class Event(BaseModel):
         super().__init__(**kwargs)
 
         if event_properties := events.get(self.event_code):
-            self._event_name = f"{event_properties.get("name")}{f' {self.age_group}' if self.age_group else ''}{f' {self.sex}' if self.sex else ''}"
+            self._event_name: EventName = f"{event_properties.get('name')}{f' {self.age_group}' if self.age_group else ''}{f' {self.sex}' if self.sex else ''}"
             self._event_type = event_properties.get("type")
         else:
-            self._event_name = self.event_code
+            self._event_name: EventName = self.event_code
             self._event_type = "Unknown"
-    
-    @property
-    def event_name(self) ->str:
-        return self._event_name
-    
-    @property
-    def event_type(self) ->str:
-        return self._event_type
 
-EventName = Annotated[str,{}]
+    @property
+    def event_name(self) -> EventName:
+        return self._event_name
+
+    @property
+    def event_type(self) -> str:
+        return self._event_type

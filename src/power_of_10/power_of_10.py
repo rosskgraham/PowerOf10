@@ -10,11 +10,11 @@ from power_of_10 import (
 
 class PowerOf10:
     def __init__(self):
-        pass
+        self._root_url = "https://www.thepowerof10.info"
 
     def get_athlete_by_id(self, athlete_id: int) -> Athlete:
         """Get an athlete's details by their athleteid."""
-        url = f"https://www.thepowerof10.info/athletes/profile.aspx?athleteid={athlete_id}"
+        url = f"{self._root_url}/athletes/profile.aspx?athleteid={athlete_id}"
         html = httpx.get(url, verify=False).text
 
         if "Profile not found" in html:
@@ -23,12 +23,6 @@ class PowerOf10:
 
         soup = BeautifulSoup(html, "html.parser")
 
-        athlete = html_parser._get_athlete_details(soup)
-
-        athlete.best_performances = html_parser._get_best_performances(soup)
-
-        athlete.all_performances = html_parser._get_all_performances(soup)
-
-        return athlete
+        return html_parser._get_athlete(soup)
 
 

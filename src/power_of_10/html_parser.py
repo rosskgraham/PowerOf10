@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from power_of_10 import (
     AthleteDetailsNotFoundException,
@@ -15,7 +16,16 @@ from power_of_10.models import (
 )
 
 
-def _get_athlete_details(soup: BeautifulSoup) -> Athlete:
+def _get_table_cell_text(table: Tag, row_ix: int, td_ix: int) -> str:
+    """Get cell text from HTML table object by row and column index."""
+    rows = table.find_all("tr")
+    try:
+        return rows[row_ix].find_all("td")[td_ix].text.strip()
+    except KeyError:
+        return "Cell text not found."
+
+
+def _get_athlete(soup: BeautifulSoup) -> Athlete:
     try:
         athlete_name = (
             soup.find("tr", {"class": "athleteprofilesubheader"})
@@ -27,18 +37,18 @@ def _get_athlete_details(soup: BeautifulSoup) -> Athlete:
         raise AthleteNameNotFoundException("Athlete name not found.") from err
 
     try:
-        athlete_details = (
+        athlete_details_table = (
             soup.find("div", {"id": "cphBody_pnlAthleteDetails"})
             .find_all("table")[1]
             .find("table")
-            .find_all("tr")
         )
-        club = athlete_details[0].find_all("td")[1].text.strip()
-        gender = athlete_details[1].find_all("td")[1].text.strip()
-        age_group = athlete_details[2].find_all("td")[1].text.strip()
-        county = athlete_details[3].find_all("td")[1].text.strip()
-        region = athlete_details[4].find_all("td")[1].text.strip()
-        nation = athlete_details[5].find_all("td")[1].text.strip()
+
+        club = _get_table_cell_text(athlete_details_table, 0, 1)
+        gender = _get_table_cell_text(athlete_details_table, 1, 1)
+        age_group = _get_table_cell_text(athlete_details_table, 2, 1)
+        county = _get_table_cell_text(athlete_details_table, 3, 1)
+        region = _get_table_cell_text(athlete_details_table, 4, 1)
+        nation = _get_table_cell_text(athlete_details_table, 5, 1)
 
         return Athlete(
             name=athlete_name,
@@ -48,8 +58,8 @@ def _get_athlete_details(soup: BeautifulSoup) -> Athlete:
             county=county,
             region=region,
             nation=nation,
-            best_performances={},
-            all_performances=[],
+            best_performances=_get_best_performances(soup),
+            all_performances=_get_all_performances(soup),
         )
     except AttributeError as err:
         raise AthleteDetailsNotFoundException("Athlete details not found.") from err
@@ -71,51 +81,45 @@ def _get_best_performances(soup: BeautifulSoup) -> dict[EventName, BestPerforman
         elif th and tr.find("td").text.strip() != "Event":
             td = [td.text for td in tr.find_all("td")]
 
-            event = string_utils.parse_event_code(td[0])
+            event_name = string_utils.parse_event_code(td[0]).event_name
 
-            year_bests = [
-                {"year": year_best[0], "result": year_best[1]}
-                for year_best in zip(th[2:], td[2:], strict=True)
-                if year_best[0].strip()
-                != "Event"  # Lose the repeated Event Name column
-            ]
-            best_performances[event.event_name] = BestPerformance(
-                event_name=event.event_name,
+            year_bests = {
+                int(year.strip()): best_performance.strip()
+                for year, best_performance in zip(th[2:], td[2:], strict=True)
+                if year.strip() != "Event"  # Lose the repeated Event Name column
+            }
+            best_performances[event_name] = BestPerformance(
+                event_name=event_name,
                 personal_best=td[1],
-                year_bests={result["year"]: result["result"] for result in year_bests},
+                year_bests=year_bests,
             )
     return best_performances
 
 
-def _get_all_performances(soup) -> list[Performance]:
-    all_performance_rows = (
+def _get_all_performances(soup: BeautifulSoup) -> list[Performance]:
+    all_performance_table_rows = (
         soup.find("div", {"id": "cphBody_pnlPerformances"})
         .find_all("table")[1]
         .find_all("tr")
     )
 
-    rows = []
-    for row in all_performance_rows:
-        if row.find("td").text.strip() == "Event":
-            continue
-        elif row.find("td", {"colspan": "12"}):
-            continue
-        rows.append(row)
+    filtered_rows = [
+        row.find_all("td")
+        for row in all_performance_table_rows
+        if not row.find("td").text.strip() == "Event"
+        and not row.find("td", {"colspan": "12"})
+    ]
 
-    all_performances: list[Performance] = []
-    for tr in rows:
-        tds = tr.find_all("td")
-        all_performances.append(
-            Performance(
-                **{
-                    "event_name": tds[0].text,
-                    "performance": tds[1].text,
-                    "indoor": "Y" if tds[2].text == "i" else "",
-                    "position": tds[5].text,
-                    "meeting": tds[10].text,
-                    "date": datetime.strptime(tds[11].text, "%d %b %y"),
-                }
-            )
+    return [
+        Performance(
+            **{
+                "event_name": tds[0].text.strip(),
+                "performance": tds[1].text.strip(),
+                "indoor": "Y" if tds[2].text.strip() == "i" else "",
+                "position": tds[5].text.strip(),
+                "meeting": tds[10].text.strip(),
+                "date": datetime.strptime(tds[11].text.strip(), "%d %b %y"),
+            }
         )
-
-    return all_performances
+        for tds in filtered_rows
+    ]

@@ -1,6 +1,8 @@
 # %%
 from datetime import timedelta
+
 import polars as pl
+
 from power_of_10 import PowerOf10
 
 murray = PowerOf10().get_athlete_by_id(1114055)
